@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Штурм закрытого канала | Только 3 попытки</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Мощный анимированный фон */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: radial-gradient(ellipse at 30% 50%, #2d0b00 0%, #0a0a0a 70%);
+            animation: pulseBg 8s ease-in-out infinite alternate;
+        }
+        @keyframes pulseBg {
+            0% { opacity: 0.8; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        /* Частицы (простые псевдоэлементы) */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            background-image: 
+                radial-gradient(circle, rgba(255,179,0,0.15) 1px, transparent 1px),
+                radial-gradient(circle, rgba(255,77,0,0.1) 1px, transparent 1px);
+            background-size: 60px 60px, 90px 90px;
+            background-position: 0 0, 30px 30px;
+            animation: moveParticles 20s linear infinite;
+        }
+        @keyframes moveParticles {
+            0% { background-position: 0 0, 30px 30px; }
+            100% { background-position: 100px 100px, 130px 130px; }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            font-size: 4.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            line-height: 1.1;
+        }
+        h1 .accent {
+            color: #ffb300;
+            text-shadow: 0 0 30px rgba(255,179,0,0.5);
+        }
+        h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 20px 50px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: #000;
+            background: #ffb300;
+            box-shadow: 0 0 40px rgba(255,179,0,0.6);
+            border: 2px solid #ffa000;
+        }
+        .btn:hover {
+            background: #ffa000;
+            box-shadow: 0 0 60px rgba(255,179,0,0.9);
+            transform: translateY(-5px);
+        }
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 0 25px rgba(255,179,0,0.4);
+        }
+        .btn.disabled {
+            background: #333;
+            color: #777;
+            border-color: #555;
+            box-shadow: none;
+            pointer-events: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Секции */
+        section {
+            padding: 70px 0;
+        }
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+        .hero .sub {
+            font-size: 1.3rem;
+            margin: 20px 0 30px;
+            max-width: 600px;
+            color: #ccc;
+        }
+        .attempt-counter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .attempt-badge {
+            background: #ffb300;
+            color: #000;
+            font-weight: 900;
+            font-size: 2.5rem;
+            padding: 5px 20px;
+            border-radius: 12px;
+            min-width: 60px;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .info-block {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,179,0,0.2);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+            backdrop-filter: blur(5px);
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .step {
+            background: #111;
+            border: 1px solid #ffb300;
+            border-radius: 14px;
+            padding: 25px;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .step:hover {
+            border-color: #ffa000;
+            background: #1a1a1a;
+            transform: scale(1.02);
+        }
+        .step-number {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #ffb300;
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #1a1a1a;
+            border: 2px solid #ffb300;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 50px rgba(255,179,0,0.3);
+        }
+        .modal-content h2 {
+            margin-top: 0;
+        }
+        .timer {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #ffb300;
+            margin: 20px 0;
+            font-variant-numeric: tabular-nums;
+        }
+        .link-box {
+            background: #000;
+            border: 1px solid #ffb300;
+            padding: 15px;
+            border-radius: 8px;
+            word-break: break-all;
+            margin: 20px 0;
+            font-family: monospace;
+            color: #ffb300;
+        }
+        .btn-small {
+            padding: 10px 25px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="particles"></div>
+
+    <main class="container">
+        <!-- HERO -->
+        <section class="hero">
+            <h1><span class="accent">ВРЫВАЙСЯ</span><br>В ЗАКРЫТЫЙ КАНАЛ</h1>
+            <p class="sub">У тебя всего <strong style="color:#ffb300;">3 попытки</strong> получить доступ.<br>Каждая ссылка живёт <strong>10 минут</strong> и исчезает навсегда.</p>
+            
+            <div class="attempt-counter">
+                <span>Осталось попыток:</span>
+                <span class="attempt-badge" id="attemptDisplay">3</span>
+            </div>
+
+            <button class="btn" id="generateBtn">⚡ ЗАНЯТЬ ПОПЫТКУ</button>
+            <p style="margin-top:15px; font-size:0.9rem; color:#ff4d4d;">После 3 нажатий вход закроется полностью</p>
+        </section>
+
+        <!-- ЧТО ВНУТРИ -->
+        <section>
+            <h2>Что ждёт внутри канала?</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">01</div>
+                    <h3>Мгновенный заказ</h3>
+                    <p>Готовые решения без лишних вопросов</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">02</div>
+                    <h3>Закрытые цены</h3>
+                    <p>Только для своих — не найти в открытом доступе</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">03</div>
+                    <h3>Персональный подход</h3>
+                    <p>Админ отвечает сразу, без очереди</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ОГРАНИЧЕНИЯ -->
+        <section>
+            <div class="info-block">
+                <h2 style="color:#ffb300;">⚠️ Жёсткие правила</h2>
+                <ul style="list-style: none; font-size: 1.1rem; line-height: 2;">
+                    <li>🔸 <strong>3 генерации</strong> — не важно, использовал ты ссылку или нет. Попытка сгорает при нажатии.</li>
+                    <li>🔸 <strong>10 минут</strong> — таймер запускается сразу. Не перешёл — доступ потерян.</li>
+                    <li>🔸 <strong>Одноразовый вход</strong> — ссылка примет только одного человека.</li>
+                    <li>🔸 <strong>После 3 нажатий</strong> кнопка исчезнет, и доступ больше не получить.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- КАК ЭТО РАБОТАЕТ -->
+        <section>
+            <h2>Твой штурм за 3 шага</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Жми кнопку</h3>
+                    <p>Ты получишь уникальную ссылку-приглашение</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Следи за таймером</h3>
+                    <p>10 минут — твой коридор для входа</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Врывайся в канал</h3>
+                    <p>Делай заказ сразу после вступления</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ФУТЕР -->
+        <footer style="text-align: center; padding: 40px 0; opacity: 0.6; font-size: 0.9rem;">
+            © Закрытый канал. Все попытки учтены.
+        </footer>
+    </main>
+
+    <!-- МОДАЛЬНОЕ ОКНО -->
+    <div class="modal" id="linkModal">
+        <div class="modal-content">
+            <h2>🔥 Твоя ссылка готова!</h2>
+            <p>Осталось времени:</p>
+            <div class="timer" id="timerDisplay">10:00</div>
+            <div class="link-box" id="generatedLink">здесь будет ссылка</div>
+            <button class="btn btn-small" onclick="copyLink()">📋 Скопировать</button>
+            <a href="#" class="btn btn-small" id="goToChannel" target="_blank" style="margin-left:10px;">🚀 Перейти в канал</a>
+            <p style="margin-top:20px; font-size:0.8rem; color:#ff4d4d;">Закроешь окно — потеряешь ссылку навсегда</p>
+        </div>
+    </div>
+
+    <script>
+        // Демо-режим: замени fetch на реальный запрос к бэкенду, который вернёт { invite_link: "..." }
+        // Здесь имитируем генерацию ссылки (для теста)
+        const MAX_ATTEMPTS = 3;
+        let attemptsLeft = MAX_ATTEMPTS;
+
+        // Проверяем, не сохранены ли попытки в localStorage (для демо)
+        if (localStorage.getItem('attemptsLeft') !== null) {
+            attemptsLeft = parseInt(localStorage.getItem('attemptsLeft'));
+        } else {
+            localStorage.setItem('attemptsLeft', attemptsLeft);
+        }
+        updateDisplay();
+
+        const generateBtn = document.getElementById('generateBtn');
+        const attemptDisplay = document.getElementById('attemptDisplay');
+        const linkModal = document.getElementById('linkModal');
+        const generatedLink = document.getElementById('generatedLink');
+        const goToChannel = document.getElementById('goToChannel');
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        let timerInterval;
+        let timeLeft = 600; // 10 минут в секундах
+
+        generateBtn.addEventListener('click', () => {
+            if (attemptsLeft <= 0) return;
+            
+            // Эмуляция генерации ссылки (замени на реальный запрос)
+            // Пример реального запроса:
+            // fetch('/generate-link.php', { method: 'POST' })
+            // .then(r => r.json())
+            // .then(data => { showModal(data.invite_link); })
+            
+            const fakeLink = 'https://t.me/+' + Math.random().toString(36).substring(2, 12);
+            
+            // Уменьшаем счётчик
+            attemptsLeft--;
+            localStorage.setItem('attemptsLeft', attemptsLeft);
+            updateDisplay();
+            
+            // Показываем модалку
+            showModal(fakeLink);
+            
+            if (attemptsLeft === 0) {
+                generateBtn.classList.add('disabled');
+                generateBtn.textContent = '⛔ ПОПЫТКИ ИСЧЕРПАНЫ';
+            }
+        });
+
+        function showModal(link) {
+            generatedLink.textContent = link;
+            goToChannel.href = link;
+            timeLeft = 600;
+            updateTimerDisplay();
+            linkModal.classList.add('active');
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    // Таймер истёк
+                    linkModal.querySelector('.modal-content').innerHTML = `
+                        <h2>⏰ Время вышло</h2>
+                        <p>Ссылка больше не действительна. Попытка использована.</p>
+                        <button class="btn btn-small" onclick="closeModal()">Понял</button>
+                    `;
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            timerDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        window.closeModal = function() {
+            linkModal.classList.remove('active');
+            clearInterval(timerInterval);
+            // Восстановить контент модалки для будущих использований (если ещё есть попытки)
+            if (attemptsLeft > 0) {
+                linkModal.querySelector('.modal-content').innerHTML = `
+                    <h2>🔥 Твоя ссылка готова!</h2>
+                    <p>Осталось времени:</p>
+                    <div class="timer" id="timerDisplay">10:00</div>
+                    <div class="link-box" id="generatedLink">здесь будет ссылка</div>
+                    <button class="btn btn-small" onclick="copyLink()">📋 Скопировать</button>
+                    <a href="#" class="btn btn-small" id="goToChannel" target="_blank" style="margin-left:10px;">🚀 Перейти в канал</a>
+                    <p style="margin-top:20px; font-size:0.8rem; color:#ff4d4d;">Закроешь окно — потеряешь ссылку навсегда</p>
+                `;
+                // Заново получить ссылки на элементы
+                document.getElementById('generatedLink').textContent = '';
+                document.getElementById('goToChannel').href = '#';
+                document.getElementById('timerDisplay').textContent = '10:00';
+            }
+        };
+
+        function updateDisplay() {
+            attemptDisplay.textContent = attemptsLeft;
+            if (attemptsLeft === 0) {
+                generateBtn.classList.add('disabled');
+                generateBtn.textContent = '⛔ ПОПЫТКИ ИСЧЕРПАНЫ';
+            } else {
+                generateBtn.classList.remove('disabled');
+                generateBtn.textContent = '⚡ ЗАНЯТЬ ПОПЫТКУ';
+            }
+        }
+
+        // Копирование ссылки
+        window.copyLink = function() {
+            const link = document.getElementById('generatedLink').textContent;
+            navigator.clipboard.writeText(link).then(() => {
+                alert('Ссылка скопирована!');
+            });
+        };
+
+        // Закрытие модалки по клику вне (для удобства)
+        window.onclick = function(event) {
+            if (event.target === linkModal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+  </html>
